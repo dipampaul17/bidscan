@@ -9,21 +9,19 @@ const STATES = [
 ];
 
 const NAICS_CODES = [
-  { code: "", label: "All categories" },
-  { code: "541512", label: "541512 — Computer Systems Design" },
-  { code: "541511", label: "541511 — Custom Programming" },
-  { code: "541519", label: "541519 — Other Computer Related" },
-  { code: "541611", label: "541611 — Management Consulting" },
-  { code: "541330", label: "541330 — Engineering Services" },
-  { code: "236220", label: "236220 — Commercial Construction" },
-  { code: "561210", label: "561210 — Facilities Support" },
-  { code: "561720", label: "561720 — Janitorial Services" },
-  { code: "561612", label: "561612 — Security Guards" },
-  { code: "511210", label: "511210 — Software Publishers" },
-  { code: "518210", label: "518210 — Data Processing & Hosting" },
-  { code: "541690", label: "541690 — Scientific & Technical Consulting" },
-  { code: "621111", label: "621111 — Physician Offices" },
-  { code: "541110", label: "541110 — Legal Services" },
+  { code: "", label: "Any" },
+  { code: "541512", label: "541512" },
+  { code: "541511", label: "541511" },
+  { code: "541519", label: "541519" },
+  { code: "541611", label: "541611" },
+  { code: "541330", label: "541330" },
+  { code: "236220", label: "236220" },
+  { code: "238210", label: "238210" },
+  { code: "561210", label: "561210" },
+  { code: "561720", label: "561720" },
+  { code: "561612", label: "561612" },
+  { code: "511210", label: "511210" },
+  { code: "518210", label: "518210" },
 ];
 
 export default function SearchForm({ onSearch, searching, onCancel }) {
@@ -37,8 +35,6 @@ export default function SearchForm({ onSearch, searching, onCancel }) {
     );
   };
 
-  const selectAll = () => setSelectedStates(STATES.map((s) => s.code));
-
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!keywords.trim() || selectedStates.length === 0) return;
@@ -46,102 +42,127 @@ export default function SearchForm({ onSearch, searching, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6">
-        {/* Top row: keywords + NAICS */}
-        <div className="flex gap-4 mb-5">
-          <div className="flex-1">
-            <label className="block text-[11px] text-zinc-500 uppercase tracking-widest font-medium mb-2">
-              Search Keywords
-            </label>
-            <input
-              type="text"
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              placeholder="IT consulting, cybersecurity, janitorial services..."
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-[15px] text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/10 transition-all font-mono"
-              disabled={searching}
-              autoFocus
-            />
-          </div>
-          <div className="w-72 shrink-0">
-            <label className="block text-[11px] text-zinc-500 uppercase tracking-widest font-medium mb-2">
-              NAICS Code
-            </label>
-            <select
-              value={naicsCode}
-              onChange={(e) => setNaicsCode(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-[15px] text-zinc-300 focus:outline-none focus:border-blue-500/50 appearance-none cursor-pointer transition-all"
-              disabled={searching}
-            >
-              {NAICS_CODES.map((n) => (
-                <option key={n.code} value={n.code}>{n.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+    <form onSubmit={handleSubmit} className="grid grid-cols-[2fr_1fr_auto_auto] gap-4 items-end">
+      {/* Keywords */}
+      <div>
+        <label className="block font-mono text-[0.65rem] uppercase tracking-[0.15em] mb-2" style={{ color: "var(--text-2)" }}>
+          Search Query
+        </label>
+        <input
+          type="text"
+          value={keywords}
+          onChange={(e) => setKeywords(e.target.value)}
+          placeholder="E.g. cybersecurity, IT consulting, janitorial..."
+          disabled={searching}
+          autoFocus
+          className="w-full px-4 py-3.5 text-base outline-none transition-all"
+          style={{
+            background: "transparent",
+            border: "1px solid var(--border)",
+            color: "var(--text-1)",
+            fontFamily: "var(--sans)",
+          }}
+          onFocus={(e) => { e.target.style.borderColor = "var(--text-2)"; e.target.style.background = "var(--surface)"; }}
+          onBlur={(e) => { e.target.style.borderColor = "var(--border)"; e.target.style.background = "transparent"; }}
+        />
+      </div>
 
-        {/* Portals */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-[11px] text-zinc-500 uppercase tracking-widest font-medium">
-              State Portals
-            </label>
-            <button
-              type="button"
-              onClick={selectAll}
-              className="text-[11px] text-blue-400/70 hover:text-blue-400 transition-colors"
-              disabled={searching}
-            >
-              Select all
-            </button>
-          </div>
-          <div className="flex gap-2">
-            {STATES.map((s) => {
-              const active = selectedStates.includes(s.code);
-              return (
-                <button
-                  key={s.code}
-                  type="button"
-                  onClick={() => toggleState(s.code)}
-                  disabled={searching}
-                  className={`flex-1 py-3 px-4 rounded-xl text-left transition-all ${
-                    active
-                      ? "bg-blue-500/10 border-blue-500/30 border text-blue-300"
-                      : "bg-white/[0.02] border border-white/[0.06] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12]"
-                  }`}
-                >
-                  <div className="text-sm font-semibold">{s.code}</div>
-                  <div className="text-[11px] opacity-60 mt-0.5">{s.portal}</div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+      {/* NAICS */}
+      <div>
+        <label className="block font-mono text-[0.65rem] uppercase tracking-[0.15em] mb-2" style={{ color: "var(--text-2)" }}>
+          NAICS Code
+        </label>
+        <select
+          value={naicsCode}
+          onChange={(e) => setNaicsCode(e.target.value)}
+          disabled={searching}
+          className="w-full px-4 py-3.5 text-base outline-none cursor-pointer appearance-none transition-all"
+          style={{
+            background: "transparent",
+            border: "1px solid var(--border)",
+            color: naicsCode ? "var(--text-1)" : "var(--text-3)",
+            fontFamily: "var(--mono)",
+          }}
+        >
+          {NAICS_CODES.map((n) => (
+            <option key={n.code} value={n.code}>{n.label}</option>
+          ))}
+        </select>
+      </div>
 
-        {/* Submit */}
-        <div className="flex items-center gap-4">
-          {searching ? (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="h-12 px-8 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-sm font-medium hover:bg-red-500/20 transition-all"
-            >
-              Cancel Search
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={!keywords.trim() || selectedStates.length === 0}
-              className="h-12 px-8 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-20 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 hover:shadow-blue-400/30"
-            >
-              Scan {selectedStates.length} portal{selectedStates.length !== 1 ? "s" : ""}
-            </button>
-          )}
-          {selectedStates.length === 0 && !searching && (
-            <span className="text-xs text-zinc-600">Select at least one portal to scan</span>
-          )}
+      {/* State chips */}
+      <div>
+        <label className="block font-mono text-[0.65rem] uppercase tracking-[0.15em] mb-2" style={{ color: "var(--text-2)" }}>
+          Portals
+        </label>
+        <div className="flex gap-2">
+          {STATES.map((s) => {
+            const active = selectedStates.includes(s.code);
+            return (
+              <button
+                key={s.code}
+                type="button"
+                onClick={() => toggleState(s.code)}
+                disabled={searching}
+                className="px-3 py-3 font-mono text-xs tracking-wider cursor-pointer transition-all"
+                style={{
+                  background: active ? "var(--red-dim)" : "transparent",
+                  border: `1px solid ${active ? "var(--red)" : "var(--border)"}`,
+                  color: active ? "var(--red)" : "var(--text-2)",
+                  boxShadow: active ? "inset 0 0 10px rgba(255,26,26,0.1)" : "none",
+                }}
+              >
+                {s.code}
+              </button>
+            );
+          })}
         </div>
+      </div>
+
+      {/* Action */}
+      <div className="flex flex-col justify-end">
+        <label className="block font-mono text-[0.65rem] uppercase tracking-[0.15em] mb-2 opacity-0">
+          Action
+        </label>
+        {searching ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-3 font-mono text-sm uppercase tracking-[0.1em] cursor-pointer transition-all"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--text-2)",
+              color: "var(--text-2)",
+            }}
+          >
+            ABORT
+          </button>
+        ) : (
+          <button
+            type="submit"
+            disabled={!keywords.trim() || selectedStates.length === 0}
+            className="px-6 py-3 font-mono text-sm uppercase tracking-[0.1em] cursor-pointer transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+            style={{
+              background: "transparent",
+              border: "1px solid var(--red)",
+              color: "var(--red)",
+            }}
+            onMouseEnter={(e) => {
+              if (!e.target.disabled) {
+                e.target.style.background = "var(--red)";
+                e.target.style.color = "black";
+                e.target.style.boxShadow = "var(--red-glow)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = "transparent";
+              e.target.style.color = "var(--red)";
+              e.target.style.boxShadow = "none";
+            }}
+          >
+            SCAN
+          </button>
+        )}
       </div>
     </form>
   );

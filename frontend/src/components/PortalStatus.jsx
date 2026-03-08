@@ -1,63 +1,56 @@
-const STATUS_MAP = {
-  idle:        { color: "text-zinc-600",    dot: "bg-zinc-700",    bg: "" },
-  connecting:  { color: "text-cyan-400",    dot: "bg-cyan-400",    bg: "bg-cyan-400/5" },
-  navigating:  { color: "text-amber-400",   dot: "bg-amber-400",   bg: "bg-amber-400/5" },
-  extracting:  { color: "text-blue-400",    dot: "bg-blue-400",    bg: "bg-blue-400/5" },
-  complete:    { color: "text-emerald-400", dot: "bg-emerald-400", bg: "bg-emerald-400/5" },
-  error:       { color: "text-red-400",     dot: "bg-red-400",     bg: "bg-red-400/5" },
-};
-
-const STATE_NAMES = {
-  CA: "California",
-  TX: "Texas",
-  NY: "New York",
-  FL: "Florida",
-  IL: "Illinois",
-};
+const STATE_NAMES = { CA: "California", TX: "Texas", NY: "New York", FL: "Florida", IL: "Illinois" };
 
 export default function PortalStatusBar({ portalStates }) {
   const entries = Object.entries(portalStates);
   if (entries.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-5 gap-3">
+    <div className="flex gap-3">
       {entries.map(([code, state]) => {
-        const cfg = STATUS_MAP[state.status] || STATUS_MAP.idle;
-        const count = state.results?.length || 0;
         const isActive = ["connecting", "navigating", "extracting"].includes(state.status);
+        const isDone = state.status === "complete";
+        const isError = state.status === "error";
+        const count = state.results?.length || 0;
 
         return (
           <div
             key={code}
-            className={`rounded-xl border border-white/[0.06] px-4 py-3 transition-all ${cfg.bg}`}
+            className="flex-1 px-4 py-3 transition-all"
+            style={{
+              border: `1px solid ${isActive ? "var(--red)" : "var(--border)"}`,
+              background: isActive ? "var(--red-dim)" : "transparent",
+              boxShadow: isActive ? "inset 0 0 15px rgba(255,26,26,0.05)" : "none",
+            }}
           >
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  {isActive && (
-                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${cfg.dot} opacity-75`} />
-                  )}
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${cfg.dot}`} />
+                {isActive && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{
+                      background: "var(--red)",
+                      boxShadow: "var(--red-glow)",
+                      animation: "blink 2s infinite",
+                    }}
+                  />
+                )}
+                <span className="font-mono text-xs font-medium" style={{ color: isActive ? "var(--red)" : isDone ? "var(--text-1)" : "var(--text-2)" }}>
+                  {code}
                 </span>
-                <span className="text-sm font-semibold text-zinc-200">{code}</span>
               </div>
-              {state.status === "complete" && (
-                <span className="text-[11px] font-mono text-zinc-500">{state.elapsed}s</span>
+              {isDone && (
+                <span className="font-mono text-[10px]" style={{ color: "var(--text-2)" }}>{state.elapsed}s</span>
               )}
             </div>
-            <div className="text-[11px] text-zinc-500 mb-1">{STATE_NAMES[code]}</div>
-            <div className={`text-xs truncate ${cfg.color}`}>
-              {state.status === "complete" && count > 0
-                ? `${count} opportunities found`
-                : state.status === "complete"
-                ? "No results"
-                : state.status === "error"
-                ? state.message
-                : state.message || "Waiting..."}
+            <div className="font-mono text-[10px] uppercase tracking-wider truncate" style={{
+              color: isError ? "#ff4444" : isActive ? "var(--red)" : isDone && count > 0 ? "var(--text-1)" : "var(--text-2)",
+            }}>
+              {isDone && count > 0 ? `${count} FOUND` : isDone ? "NO RESULTS" : isError ? "ERROR" : state.message || "QUEUED"}
             </div>
           </div>
         );
       })}
+      <style>{`@keyframes blink { 0%{opacity:.2} 50%{opacity:1} 100%{opacity:.2} }`}</style>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import SearchForm from "./components/SearchForm";
 import PortalStatusBar from "./components/PortalStatus";
 import ResultsTable from "./components/ResultsTable";
@@ -10,83 +9,102 @@ export default function App() {
   const totalFound = results.length;
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-200">
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-[#09090b]/90 backdrop-blur-md border-b border-white/[0.06]">
-        <div className="max-w-[1400px] mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-            </div>
-            <span className="text-[15px] font-semibold tracking-tight text-white">BidScan</span>
-          </div>
+    <div className="h-screen flex flex-col overflow-hidden relative" style={{ background: "var(--bg)" }}>
+      {/* Watermark */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[20vw] font-extrabold pointer-events-none select-none z-0 whitespace-nowrap"
+        style={{ color: "var(--text-3)", opacity: 0.04, letterSpacing: "-0.05em" }}
+      >
+        BIDSCAN
+      </div>
 
-          <div className="flex items-center gap-4">
-            {searching && (
-              <div className="flex items-center gap-2 text-sm text-zinc-400">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
-                </span>
-                <span className="font-mono text-xs">{elapsed}s</span>
-              </div>
-            )}
-            {done && totalFound > 0 && (
-              <div className="text-xs text-zinc-500">
-                <span className="font-mono text-zinc-300">{totalFound}</span> results in{" "}
-                <span className="font-mono text-zinc-300">{elapsed}s</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-[1400px] mx-auto px-6 py-8">
-        {/* Search section */}
-        <div className="mb-8">
+      <div className="relative z-10 flex flex-col h-full max-w-[1600px] mx-auto w-full px-6 lg:px-8 py-6 gap-5">
+        {/* Control Deck */}
+        <header className="relative pb-5" style={{ borderBottom: "1px solid var(--border)" }}>
           <SearchForm onSearch={search} searching={searching} onCancel={cancel} />
-        </div>
 
-        {/* Portal status */}
+          {/* Scan line */}
+          {searching && (
+            <div className="absolute bottom-[-1px] left-0 h-[1px] animate-pulse" style={{
+              width: "30%",
+              background: "var(--red)",
+              boxShadow: "var(--red-glow)",
+              animation: "scanline 3s ease-in-out infinite",
+            }}>
+              <div className="absolute right-0 top-[-2px] w-1 h-1 rounded-full" style={{
+                background: "var(--red)", boxShadow: "var(--red-glow)"
+              }} />
+            </div>
+          )}
+        </header>
+
+        {/* Portal Status */}
         {hasActivity && (
-          <div className="mb-6">
+          <div className="shrink-0">
             <PortalStatusBar portalStates={portalStates} />
           </div>
         )}
 
-        {/* Results */}
-        {hasActivity && <ResultsTable results={results} done={done} elapsed={elapsed} />}
+        {/* Results viewport */}
+        <main className="flex-1 overflow-y-auto min-h-0" style={{
+          border: hasActivity ? "1px solid var(--border)" : "none",
+          background: hasActivity ? "rgba(10,10,10,0.5)" : "transparent",
+        }}>
+          {hasActivity ? (
+            <ResultsTable results={results} done={done} elapsed={elapsed} />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="font-mono text-7xl font-bold tracking-tighter" style={{ color: "var(--text-3)" }}>
+                $200B+
+              </div>
+              <p className="mt-4 text-sm max-w-lg text-center leading-relaxed" style={{ color: "var(--text-2)" }}>
+                Annual state & local procurement spending flows through portals with no APIs.
+                BidScan scans them in parallel using web agents.
+              </p>
+            </div>
+          )}
+        </main>
 
-        {/* Empty state */}
-        {!hasActivity && (
-          <div className="flex flex-col items-center justify-center pt-32 pb-20">
-            <div className="text-zinc-800 font-mono text-6xl font-bold tracking-tighter">
-              $200B+
+        {/* Status Bar */}
+        <footer className="shrink-0 flex items-center justify-between pt-4" style={{ borderTop: "1px solid var(--border)" }}>
+          <div className="flex items-center gap-8">
+            <div>
+              <div className="font-mono text-[0.65rem] uppercase tracking-[0.15em]" style={{ color: "var(--text-2)" }}>System</div>
+              <div className="text-sm" style={{ color: searching ? "var(--red)" : "var(--text-2)" }}>
+                {searching ? "AGENTS ACTIVE" : "IDLE"}
+              </div>
             </div>
-            <p className="mt-4 text-zinc-500 text-base max-w-lg text-center leading-relaxed">
-              Annual state & local procurement spending flows through portals with no APIs.
-              BidScan scans them in parallel using web agents.
-            </p>
-            <div className="mt-8 flex items-center gap-6 text-xs text-zinc-600">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500/40" />
-                5 state portals
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/40" />
-                Real-time streaming
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500/40" />
-                Parallel crawling
-              </span>
-            </div>
+            {hasActivity && (
+              <div>
+                <div className="font-mono text-[0.65rem] uppercase tracking-[0.15em]" style={{ color: "var(--text-2)" }}>Elapsed</div>
+                <div className="text-sm font-mono">{elapsed}s</div>
+              </div>
+            )}
           </div>
-        )}
-      </main>
+          <div className="flex items-center gap-8">
+            {totalFound > 0 && (
+              <div className="text-right">
+                <div className="font-mono text-[0.65rem] uppercase tracking-[0.15em]" style={{ color: "var(--text-2)" }}>Matches</div>
+                <div className="text-sm font-mono" style={{ color: "var(--red)" }}>{totalFound} FOUND</div>
+              </div>
+            )}
+            {done && totalFound > 0 && (
+              <div className="text-right">
+                <div className="font-mono text-[0.65rem] uppercase tracking-[0.15em]" style={{ color: "var(--text-2)" }}>Time Saved</div>
+                <div className="text-sm font-mono">{(totalFound * 8 / 60).toFixed(1)}h</div>
+              </div>
+            )}
+          </div>
+        </footer>
+      </div>
+
+      <style>{`
+        @keyframes scanline {
+          0% { left: 0; width: 30%; }
+          50% { left: 35%; width: 40%; }
+          100% { left: 70%; width: 30%; }
+        }
+      `}</style>
     </div>
   );
 }

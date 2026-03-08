@@ -200,7 +200,7 @@ async def _poll_run_result(run_id: str) -> list[dict] | None:
     headers = {"X-API-Key": TINYFISH_API_KEY}
     timeout = aiohttp.ClientTimeout(total=15)
 
-    for attempt in range(6):  # poll up to 6 times, 5s apart = 30s max
+    for attempt in range(12):  # poll up to 12 times, 10s apart = 2 min max
         try:
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 async with session.get(f"{TINYFISH_RUN_URL}/{run_id}", headers=headers) as resp:
@@ -221,8 +221,8 @@ async def _poll_run_result(run_id: str) -> list[dict] | None:
         except Exception as e:
             log.warning(f"Poll error for {run_id}: {e}")
 
-        if attempt < 5:
-            await asyncio.sleep(5)
+        if attempt < 11:
+            await asyncio.sleep(10)
 
     return None
 
@@ -262,7 +262,7 @@ async def crawl_portal(
     got_complete = False
 
     try:
-        timeout = aiohttp.ClientTimeout(total=240, sock_read=240)
+        timeout = aiohttp.ClientTimeout(total=420, sock_read=420)  # 7 min — state portals are slow
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(TINYFISH_SSE_URL, json=payload, headers=headers) as resp:
                 if resp.status != 200:
@@ -405,7 +405,7 @@ async def crawl_portal(
         await emit(PortalEvent(
             portal=portal.portal_name, state=portal.state_code,
             status=PortalStatus.ERROR,
-            message="Portal timed out after 240s",
+            message="Portal timed out after 420s",
             elapsed_seconds=elapsed(),
         ))
     except asyncio.CancelledError:

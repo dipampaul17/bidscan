@@ -26,10 +26,10 @@ const NAICS_CODES = [
   { code: "541110", label: "Legal Services", desc: "Law firms, counsel" },
 ];
 
-export default function SearchForm({ onSearch, searching, onCancel }) {
-  const [keywords, setKeywords] = useState("");
-  const [naicsCode, setNaicsCode] = useState("");
-  const [selectedStates, setSelectedStates] = useState(["CA", "TX", "NY"]);
+export default function SearchForm({ onSearch, searching, onCancel, lastQuery }) {
+  const [keywords, setKeywords] = useState(lastQuery?.keywords || "");
+  const [naicsCode, setNaicsCode] = useState(lastQuery?.naicsCode || "");
+  const [selectedStates, setSelectedStates] = useState(lastQuery?.states || ["CA", "TX", "NY"]);
 
   const toggleState = (code) => {
     setSelectedStates((prev) =>

@@ -4,7 +4,7 @@ import ResultsTable from "./components/ResultsTable";
 import { useSearch } from "./hooks/useSearch";
 
 export default function App() {
-  const { portalStates, results, searching, elapsed, done, search, cancel } = useSearch();
+  const { portalStates, results, searching, elapsed, done, lastQuery, search, cancel, clearResults } = useSearch();
   const hasActivity = Object.keys(portalStates).length > 0;
   const totalFound = results.length;
   const portalsSearched = Object.values(portalStates).filter((p) => p.status === "complete").length;
@@ -23,27 +23,41 @@ export default function App() {
               PROCUREMENT INTELLIGENCE
             </span>
           </div>
-          {(searching || done) && (
-            <div className="flex items-center gap-6 font-mono text-xs">
-              {searching && (
-                <div className="flex items-center gap-2" style={{ color: "var(--red)" }}>
-                  <span className="w-1.5 h-1.5 rounded-full inline-block" style={{
-                    background: "var(--red)", boxShadow: "var(--red-glow)", animation: "blink 2s infinite"
-                  }} />
-                  SCANNING
-                </div>
-              )}
-              <span style={{ color: "var(--text-2)" }}>{elapsed}s</span>
-              {totalFound > 0 && (
-                <span style={{ color: "var(--red)" }}>{totalFound} FOUND</span>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-6 font-mono text-xs">
+            {searching && (
+              <div className="flex items-center gap-2" style={{ color: "var(--red)" }}>
+                <span className="w-1.5 h-1.5 rounded-full inline-block" style={{
+                  background: "var(--red)", boxShadow: "var(--red-glow)", animation: "blink 2s infinite"
+                }} />
+                SCANNING
+              </div>
+            )}
+            {!searching && lastQuery && (
+              <span style={{ color: "var(--text-3)" }}>
+                "{lastQuery.keywords}" · {lastQuery.states.join(",")}
+              </span>
+            )}
+            {hasActivity && <span style={{ color: "var(--text-2)" }}>{elapsed}s</span>}
+            {totalFound > 0 && (
+              <span style={{ color: "var(--red)" }}>{totalFound} FOUND</span>
+            )}
+            {!searching && hasActivity && (
+              <button
+                onClick={clearResults}
+                className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 cursor-pointer transition-all"
+                style={{ color: "var(--text-3)", border: "1px solid var(--border)" }}
+                onMouseEnter={(e) => { e.target.style.color = "var(--text-2)"; e.target.style.borderColor = "var(--text-2)"; }}
+                onMouseLeave={(e) => { e.target.style.color = "var(--text-3)"; e.target.style.borderColor = "var(--border)"; }}
+              >
+                CLEAR
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Search */}
         <div className="shrink-0 relative pb-4" style={{ borderBottom: "1px solid var(--border)" }}>
-          <SearchForm onSearch={search} searching={searching} onCancel={cancel} />
+          <SearchForm onSearch={search} searching={searching} onCancel={cancel} lastQuery={lastQuery} />
           {searching && (
             <div className="absolute bottom-[-1px] left-0 h-[1px]" style={{
               background: "var(--red)", boxShadow: "var(--red-glow)",
